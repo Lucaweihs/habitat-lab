@@ -203,8 +203,8 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
 
         self._sensor_suite = SensorSuite(sim_sensors)
         self.sim_config = self.create_sim_config(self._sensor_suite)
-        self._current_scene = self.sim_config.sim_cfg.scene.id
-        super().__init__(self.sim_config)
+        self._current_scene = None
+        super().__init__(self.habitat_config)
         self._action_space = spaces.Discrete(
             len(self.sim_config.agents[0].action_space)
         )
@@ -311,6 +311,10 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         return output
 
     def reconfigure(self, habitat_config: Config) -> None:
+        if len(self.agents) == 0:
+            super().reconfigure(self.sim_config)
+            self._current_scene = self.sim_config.sim_cfg.scene.id
+
         # TODO(maksymets): Switch to Habitat-Sim more efficient caching
         is_same_scene = habitat_config.SCENE == self._current_scene
         self.habitat_config = habitat_config
